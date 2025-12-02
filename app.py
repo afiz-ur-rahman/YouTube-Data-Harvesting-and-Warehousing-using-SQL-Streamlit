@@ -159,7 +159,7 @@ if st.button("Fetch & Save Data"):
                 save_to_db(cid)
                 st.success(f"✔ Data saved for Channel ID: {cid}")
             except Exception as e:
-                st.error(f"❌ Error saving {cid}: {str(e)}")
+                st.error(f" Error saving {cid}: {str(e)}")
     else:
         st.warning("Please enter at least one channel ID.")
 
@@ -266,5 +266,6 @@ for label, sql in query_mapping.items():
             st.dataframe(pd.DataFrame(result))
         else:
             st.info("No data found.")
+
 
 
