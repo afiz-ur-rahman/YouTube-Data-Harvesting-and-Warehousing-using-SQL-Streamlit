@@ -8,7 +8,7 @@ import isodate  # for parsing YouTube ISO 8601 durations
 # -----------------------------
 # CONFIGURATION
 # -----------------------------
-API_KEY = "AIzaSyAl8ZY4UZQ0giyVLc83Envgr6hn-9T_Uu4"  # Replace with your key
+API_KEY = "Enter your api key"  # Replace with your key
 
 DB_HOST = "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
 DB_PORT = 4000
@@ -266,6 +266,7 @@ for label, sql in query_mapping.items():
             st.dataframe(pd.DataFrame(result))
         else:
             st.info("No data found.")
+
 
 
 
