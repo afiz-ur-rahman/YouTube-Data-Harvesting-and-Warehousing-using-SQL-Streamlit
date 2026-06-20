@@ -1,14 +1,14 @@
 # app.py
+import re
 import streamlit as st
 import pandas as pd
 from googleapiclient.discovery import build
 import mysql.connector
-import isodate  # for parsing YouTube ISO 8601 durations
 
 # -----------------------------
 # CONFIGURATION
 # -----------------------------
-API_KEY = "Enter your api key"  # Replace with your key
+API_KEY = "enter your api key"  # Replace with your key
 
 DB_HOST = "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
 DB_PORT = 4000
@@ -65,6 +65,23 @@ conn.commit()
 # -----------------------------
 # FUNCTIONS
 # -----------------------------
+_DURATION_PATTERN = re.compile(
+    r"P(?:(?P<days>\d+)D)?(?:T(?:(?P<hours>\d+)H)?(?:(?P<minutes>\d+)M)?(?:(?P<seconds>\d+)S)?)?$"
+)
+
+
+def parse_youtube_duration(duration):
+    match = _DURATION_PATTERN.fullmatch(duration)
+    if not match:
+        raise ValueError(f"Unsupported duration format: {duration}")
+
+    days = int(match.group("days") or 0)
+    hours = int(match.group("hours") or 0)
+    minutes = int(match.group("minutes") or 0)
+    seconds = int(match.group("seconds") or 0)
+    return days * 86400 + hours * 3600 + minutes * 60 + seconds
+
+
 def get_channel_data(channel_id):
     res = youtube.channels().list(part='snippet,statistics', id=channel_id).execute()
     data = res['items'][0]
@@ -89,7 +106,7 @@ def get_videos(channel_id, max_results=50):
         stats = youtube.videos().list(part='snippet,statistics,contentDetails', id=video_id).execute()
         v = stats['items'][0]
         # Parse duration to seconds
-        duration_seconds = isodate.parse_duration(v['contentDetails']['duration']).total_seconds()
+        duration_seconds = parse_youtube_duration(v['contentDetails']['duration'])
         videos.append({
             'video_id': v['id'],
             'channel_id': channel_id,
@@ -157,7 +174,7 @@ if st.button("Fetch & Save Data"):
         for cid in channel_ids:
             try:
                 save_to_db(cid)
-                st.success(f"✔ Data saved for Channel ID: {cid}")
+                st.success(f" Data saved for Channel ID: {cid}")
             except Exception as e:
                 st.error(f" Error saving {cid}: {str(e)}")
     else:
